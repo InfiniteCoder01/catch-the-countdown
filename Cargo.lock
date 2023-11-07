@@ -47,7 +47,7 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "catch-the-countdown"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "ldtk_easy",
@@ -143,9 +143,9 @@ dependencies = [
 
 [[package]]
 name = "ldtk_easy"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b4520d53304665bda41e973142468fb12354b86654fed3c9e5df5530fa1d315"
+checksum = "63aab5627e7041c7696fd246765a675242cfad751ec3da1d2d054a6ab271934d"
 dependencies = [
  "ldtk_deser_json",
 ]

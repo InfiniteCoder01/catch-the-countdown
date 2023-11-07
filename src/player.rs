@@ -72,10 +72,8 @@ impl Player {
             }
 
             if direction.x != 0.0 {
-                if (rl.is_key_down(KeyboardKey::KEY_D) as i32
-                    - rl.is_key_down(KeyboardKey::KEY_A) as i32) as f32
-                    == motion.x.signum()
-                    && rl.is_key_down(KeyboardKey::KEY_S)
+                if self.keyboard_joy(rl) as f32 == motion.x.signum()
+                    && (rl.is_key_down(KeyboardKey::KEY_S) || rl.is_key_down(KeyboardKey::KEY_DOWN))
                 {
                     self.holding_to_wall = true;
                 }
@@ -88,10 +86,8 @@ impl Player {
                 }
             }
         } else if motion.x != 0.0
-            || (rl.is_key_down(KeyboardKey::KEY_D) as i32
-                - rl.is_key_down(KeyboardKey::KEY_A) as i32) as f32
-                == 0.0
-            || rl.is_key_released(KeyboardKey::KEY_S)
+            || self.keyboard_joy(rl) as f32 == 0.0
+            || (rl.is_key_released(KeyboardKey::KEY_S) || rl.is_key_released(KeyboardKey::KEY_DOWN))
         {
             self.holding_to_wall = false;
         }
@@ -107,10 +103,7 @@ impl Player {
         // * Jump
         if rl.is_key_pressed(KeyboardKey::KEY_SPACE) && (self.jumps > 0 || self.holding_to_wall) {
             if self.holding_to_wall {
-                self.velocity.x = (rl.is_key_down(KeyboardKey::KEY_D) as i32
-                    - rl.is_key_down(KeyboardKey::KEY_A) as i32)
-                    as f32
-                    * -300.0;
+                self.velocity.x = self.keyboard_joy(rl) as f32 * -300.0;
                 self.holding_to_wall = false;
             } else if self.jumps > 0 {
                 self.jumps -= 1;
@@ -131,10 +124,7 @@ impl Player {
         }
 
         // * Integration
-        let target_velocity = (rl.is_key_down(KeyboardKey::KEY_D) as i32
-            - rl.is_key_down(KeyboardKey::KEY_A) as i32) as f32
-            * self.size.x
-            * 10.0;
+        let target_velocity = self.keyboard_joy(rl) as f32 * self.size.x * 10.0;
 
         self.velocity.x +=
             (target_velocity - self.velocity.x) * (1.0 - 0.5_f32.powf(rl.get_frame_time() / 0.1));
@@ -152,12 +142,15 @@ impl Player {
         if self.velocity.x.abs() > 10.0 {
             self.frame = self.velocity.x.signum() as i8 * (rl.get_time() * 20.0 % 2.0 + 1.0) as i8;
         } else if self.holding_to_wall {
-            self.frame = (rl.is_key_down(KeyboardKey::KEY_D) as i8
-                - rl.is_key_down(KeyboardKey::KEY_A) as i8)
-                * 3;
+            self.frame = self.keyboard_joy(rl) * 3;
         } else {
             self.frame = 0;
         }
+    }
+
+    fn keyboard_joy(&mut self, rl: &mut RaylibHandle) -> i8 {
+        (rl.is_key_down(KeyboardKey::KEY_D) || rl.is_key_down(KeyboardKey::KEY_RIGHT)) as i8
+            - (rl.is_key_down(KeyboardKey::KEY_A) || rl.is_key_down(KeyboardKey::KEY_LEFT)) as i8
     }
 
     fn check_interactibles(&self, assets: &mut Assets, level: &mut Level, state: &mut State) {

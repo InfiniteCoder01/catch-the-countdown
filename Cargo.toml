@@ -1,13 +1,13 @@
 [package]
 name = "catch-the-countdown"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1.0.72"
-ldtk_easy = "0.1.4"
+ldtk_easy = "0.1.5"
 
 [dependencies.raylib]
 version = "4.5.0"
