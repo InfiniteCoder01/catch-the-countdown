@@ -5,12 +5,12 @@ pub mod level;
 pub mod player;
 use assets::*;
 
-fn format_time(time: std::time::Duration) -> String {
+fn format_time(time: f32) -> String {
     format!(
         "{:0>2}:{:0>2}:{:0>5.2}",
-        time.as_secs() / 3600,
-        (time.as_secs() / 60) % 60,
-        time.as_secs_f32() % 60.0
+        time as u32 / 3600,
+        (time as u32 / 60) % 60,
+        time % 60.0
     )
 }
 
@@ -151,17 +151,28 @@ fn main() -> Result<()> {
         .context("Failed to load level!")?
         .context("Failed to find first level!")?;
     let mut state = State::Playing;
-    let start = std::time::Instant::now();
+    let mut time = 0.0;
     loop {
         if rl.window_should_close() {
             return Ok(());
+        }
+
+        if rl.is_key_pressed(KeyboardKey::KEY_P) {
+            state = match state {
+                State::Playing => State::Paused,
+                State::Paused => State::Playing,
+                state => state,
+            };
         }
 
         if music && !assets.audio.is_sound_playing(&assets.song) {
             assets.audio.play_sound(&assets.song);
         }
 
-        level.update(&mut rl);
+        if state != State::Paused {
+            time += rl.get_frame_time();
+            level.update(&mut rl);
+        }
         if state == State::Playing {
             player.update(&mut assets, &mut rl, &mut level, &mut state);
             if player.position().x >= level.size().x {
@@ -208,6 +219,7 @@ fn main() -> Result<()> {
             if match state {
                 State::Playing => true,
                 State::LevelTransition { loaded, .. } => loaded,
+                State::Paused => true,
             } {
                 player.draw(&assets, &mut d);
             }
@@ -236,10 +248,13 @@ fn main() -> Result<()> {
             )
         }
 
-        d.draw_text(&format_time(start.elapsed()), 10, 10, 20, Color::WHITE)
+        let mut text = format_time(time);
+        if state == State::Paused {
+            text.push_str(" (paused)");
+        }
+        d.draw_text(&text, 10, 10, 20, Color::WHITE);
     }
 
-    let time = start.elapsed();
     let mut timer = 0.0;
     while !rl.window_should_close() {
         timer += rl.get_frame_time();

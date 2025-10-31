@@ -96,6 +96,7 @@ pub enum State {
         sound_played: bool,
         loaded: bool,
     },
+    Paused,
 }
 
 impl State {
